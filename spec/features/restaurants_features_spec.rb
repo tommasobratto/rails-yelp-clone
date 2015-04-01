@@ -3,6 +3,7 @@ require 'factories'
 
 feature 'restaurants' do
   context 'no restaurants have been added' do
+
     scenario 'should display a prompt to add a restaurant' do 
       visit '/restaurants'
       expect(page).to have_content 'No restaurants yet'
@@ -27,6 +28,25 @@ feature 'restaurants' do
     before do 
       user = FactoryGirl.create(:user)
       login_as(user, :scope => :user) 
+    end
+
+    context 'average rating' do
+
+      before {Restaurant.create(name: 'KFC')}
+
+      def leave_review(thoughts, rating)
+        visit '/restaurants'
+        click_link 'Review KFC'
+        fill_in 'Thoughts', with: thoughts
+        select rating, from: 'Rating'
+        click_button 'Leave Review'
+      end
+
+      scenario 'displays an average rating for all reviews' do 
+        leave_review('So so', '3')
+        leave_review('Great', '5')
+        expect(page).to have_content('Average rating: 4')
+      end
     end
 
     context 'creating restaurants' do    
